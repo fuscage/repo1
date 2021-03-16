@@ -1,0 +1,75 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("POSTGRESQL_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime  @default(now())
+  firstName String?
+  id        String    @id @default(cuid())
+  lastName  String?
+  password  String
+  projects  Project[]
+  roles     String[]
+  tasks     Task[]
+  updatedAt DateTime  @updatedAt
+  username  String    @unique
+}
+
+model Project {
+  createdAt   DateTime  @default(now())
+  description String?
+  dueDate     DateTime?
+  id          String    @id @default(cuid())
+  name        String?
+  owner       User      @relation(fields: [ownerId])
+  ownerId     String
+  startDate   DateTime?
+  tasks       Task[]
+  updatedAt   DateTime  @updatedAt
+}
+
+model Task {
+  assignedTo   User?          @relation(fields: [assignedToId])
+  assignedToId String?
+  createdAt    DateTime       @default(now())
+  estimation   Int?
+  id           String         @id @default(cuid())
+  project      Project        @relation(fields: [projectId])
+  projectId    String
+  startDate    DateTime
+  status       EnumTaskStatus
+  title        String
+  updatedAt    DateTime       @updatedAt
+}
+
+model Document {
+  createdAt DateTime  @default(now())
+  from      DateTime?
+  id        String    @id @default(cuid())
+  to        DateTime?
+  type      Listbox   @relation(fields: [typeId])
+  typeId    String
+  updatedAt DateTime  @updatedAt
+}
+
+model Listbox {
+  code            String
+  createdAt       DateTime @default(now())
+  documentListbox Document
+  id              String   @id @default(cuid())
+  label           String?
+  updatedAt       DateTime @updatedAt
+}
+
+enum EnumTaskStatus {
+  new
+  pending
+  onHold
+  ongoing
+  done
+}
